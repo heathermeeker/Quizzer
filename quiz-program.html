@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz from CSV</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .question {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .options {
+            margin-top: 10px;
+        }
+        .option {
+            margin: 5px 0;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .correct {
+            background-color: #d4edda;
+        }
+        .incorrect {
+            background-color: #f8d7da;
+        }
+        #fileInput {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quiz Application</h1>
+    
+    <input type="file" id="fileInput" accept=".csv">
+    <div id="quiz"></div>
+    <button id="submitQuiz" style="display: none;">Submit Quiz</button>
+    <div id="result"></div>
+
+    <script>
+        let questions = [];
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const text = e.target.result;
+                parseCSV(text);
+                displayQuiz();
+                document.getElementById('submitQuiz').style.display = 'block';
+            };
+            
+            reader.readAsText(file);
+        });
+
+        function parseCSV(csv) {
+            const lines = csv.split('\n');
+            questions = lines.map(line => {
+                const [question, correctIndex, ...options] = line.split(',').map(item => item.trim());
+                return {
+                    question,
+                    options,
+                    correct: parseInt(correctIndex) - 1 // Convert to 0-based index
+                };
+            }).filter(q => q.question); // Remove empty lines
+        }
+
+        function displayQuiz() {
+            const quizDiv = document.getElementById('quiz');
+            quizDiv.innerHTML = questions.map((q, index) => `
+                <div class="question">
+                    <div><strong>Question ${index + 1}:</strong> ${q.question}</div>
+                    <div class="options">
+                        ${q.options.map((option, optIndex) => `
+                            <div class="option">
+                                <input type="radio" name="q${index}" value="${optIndex}" id="q${index}o${optIndex}">
+                                <label for="q${index}o${optIndex}">${optIndex + 1}. ${option}</label>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('submitQuiz').addEventListener('click', function() {
+            let score = 0;
+            const resultDiv = document.getElementById('result');
+            const questionDivs = document.querySelectorAll('.question');
+
+            questions.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                const questionDiv = questionDivs[index];
+                
+                questionDiv.classList.remove('correct', 'incorrect');
+                
+                if (selected) {
+                    if (parseInt(selected.value) === q.correct) {
+                        score++;
+                        questionDiv.classList.add('correct');
+                    } else {
+                        questionDiv.classList.add('incorrect');
+                    }
+                } else {
+                    questionDiv.classList.add('incorrect');
+                }
+            });
+
+            const percentage = (score / questions.length) * 100;
+            resultDiv.innerHTML = `
+                <h2>Quiz Results</h2>
+                <p>You scored ${score} out of ${questions.length} (${percentage.toFixed(1)}%)</p>
+            `;
+            resultDiv.style.display = 'block';
+        });
+    </script>
+</body>
+</html>
