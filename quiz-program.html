@@ -1,92 +1,306 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Quiz from CSV</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .question {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .options {
-            margin-top: 10px;
-        }
-        .option {
-            margin: 5px 0;
-        }
-        #result {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 5px;
-            display: none;
-        }
-        .correct {
-            background-color: #d4edda;
-        }
-        .incorrect {
-            background-color: #f8d7da;
-        }
-        #fileInput {
-            margin-bottom: 20px;
-        }
-    </style>
+    <title>Open Source License Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>Quiz Application</h1>
-    
-    <input type="file" id="fileInput" accept=".csv">
-    <div id="quiz"></div>
-    <button id="submitQuiz" style="display: none;">Submit Quiz</button>
-    <div id="result"></div>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen">
+    <div class="max-w-4xl mx-auto p-6">
+        <!-- Header -->
+        <div class="text-center mb-12 animate__animated animate__fadeIn">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Open Source License Quiz</h1>
+            <p class="text-gray-600 text-lg">Test your knowledge of open source licensing</p>
+        </div>
+        
+        <!-- Quiz Selection -->
+        <div id="quizSelection" class="mb-8 animate__animated animate__fadeIn">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-700 text-center">Choose Your Quiz</h2>
+            <div class="grid gap-6 md:grid-cols-2">
+                <button onclick="selectQuiz('lgpl')" class="group">
+                    <div class="p-6 bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-xl text-indigo-600">Open Source Licensing Quiz</h3>
+                            <span class="text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300">→</span>
+                        </div>
+                        <p class="text-gray-600">Test your knowledge of open source licenses, their history, and applications</p>
+                        <div class="mt-4 text-sm text-gray-500">18 questions • 12 min</div>
+                    </div>
+                </button>
+                <button onclick="selectQuiz('gpl')" class="group">
+                    <div class="p-6 bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-xl text-indigo-600">GPL Understanding</h3>
+                            <span class="text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300">→</span>
+                        </div>
+                        <p class="text-gray-600">Deep dive into the GNU General Public License concepts</p>
+                        <div class="mt-4 text-sm text-gray-500">1 question1 • 1 min</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Quiz Container -->
+        <div id="quizContainer" class="hidden animate__animated animate__fadeIn">
+            <div class="flex justify-between items-center mb-6">
+                <button onclick="backToSelection()" class="text-indigo-600 hover:text-indigo-800 flex items-center gap-2">
+                    <span>←</span> Back to Quiz Selection
+                </button>
+                <div id="progress" class="text-gray-600"></div>
+            </div>
+            <div id="quiz" class="space-y-6"></div>
+            <button id="submitQuiz" class="mt-8 w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-300 font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                Submit Answers
+            </button>
+        </div>
+
+        <!-- Results -->
+        <div id="result" class="hidden mt-8 animate__animated animate__fadeIn"></div>
+    </div>
 
     <script>
-        let questions = [];
+        const quizzes = {
+            lgpl: {
+                title: "Open Source Licensing Quiz",
+                questions: [
+                    {
+                        question: "What printer caused Richard Stallman to create the GPL?",
+                        options: [
+                            "An IBM line printer",
+                            "A Xerox plain paper copier",
+                            "A Canon laser printer",
+                            "An illuminated manuscript from the 1500s"
+                        ],
+                        correct: 2
+                    },
+                    {
+                        question: "What is special about LGPL version 1?",
+                        options: [
+                            "It doesn't exist. Version 2 was co-versioned with GPL version 2.",
+                            "It is the only version to be deprecated by Free Software Foundation.",
+                            "It does not have an exception for dynamically linked libraries.",
+                            "It was the second version because it started at Version 0."
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "What is the most common open source license?",
+                        options: [
+                            "MIT",
+                            "GPL",
+                            "Apache",
+                            "BSD"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "Which open source license was created by the Apache Foundation?",
+                        options: [
+                            "MIT",
+                            "GPL",
+                            "Apache",
+                            "BSD"
+                        ],
+                        correct: 2
+                    },
+                    {
+                        question: "What license did MySQL use before it was acquired by Oracle?",
+                        options: [
+                            "GPL",
+                            "Apache",
+                            "MIT",
+                            "BSD"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "What license does Linux use?",
+                        options: [
+                            "GPL 2.0",
+                            "GPL 3.0",
+                            "Apache 2.0",
+                            "MIT"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "What open source license is the closest to being in the public domain?",
+                        options: [
+                            "CC0",
+                            "MIT",
+                            "Apache",
+                            "BSD"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "When was the first version of the GPL released?",
+                        options: [
+                            "1989",
+                            "1991",
+                            "1995",
+                            "2001"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "Which license is considered 'viral'?",
+                        options: [
+                            "GPL",
+                            "MIT",
+                            "Apache",
+                            "BSD"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "What open source software does not use GPL?",
+                        options: [
+                            "Linux",
+                            "Git",
+                            "Rust",
+                            "GCC"
+                        ],
+                        correct: 2
+                    },
+                    {
+                        question: "Which license is compatible with GPL v3?",
+                        options: [
+                            "Apache 2.0",
+                            "GPL v2 only",
+                            "CDDL",
+                            "QPL"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "What was the first 'permissive' open source license?",
+                        options: [
+                            "BSD",
+                            "MIT",
+                            "Apache",
+                            "ISC"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "What version of GPL did WordPress adopt?",
+                        options: [
+                            "GPL v2 or later",
+                            "GPL v2 only",
+                            "GPL v3",
+                            "GPL v1"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "What was the first copyleft license?",
+                        options: [
+                            "Emacs General Public License",
+                            "GPL v1",
+                            "MIT",
+                            "BSD"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "What company created the Mozilla Public License?",
+                        options: [
+                            "Netscape",
+                            "Mozilla Foundation",
+                            "Microsoft",
+                            "Google"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "Which license is not maintained by the FSF?",
+                        options: [
+                            "GPL",
+                            "LGPL",
+                            "AGPL",
+                            "MPL"
+                        ],
+                        correct: 3
+                    },
+                    {
+                        question: "What license does SQLite use?",
+                        options: [
+                            "Public Domain",
+                            "MIT",
+                            "Apache",
+                            "BSD"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "Which of these companies has never released an open source license?",
+                        options: [
+                            "Apple",
+                            "Microsoft",
+                            "Google",
+                            "Oracle"
+                        ],
+                        correct: 3
+                    }
+                ]
+            },
+            gpl: {
+                title: "GPL Understanding",
+                questions: [
+                    {
+                        question: "What is a key difference between GPL v2 and v3?",
+                        options: [
+                            "Patent grant provisions",
+                            "Copyright duration",
+                            "License fees",
+                            "Documentation requirements"
+                        ],
+                        correct: 0
+                    },
+                    // Add more GPL questions here
+                ]
+            }
+        };
 
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                const text = e.target.result;
-                parseCSV(text);
-                displayQuiz();
-                document.getElementById('submitQuiz').style.display = 'block';
-            };
-            
-            reader.readAsText(file);
-        });
+        let currentQuiz = null;
 
-        function parseCSV(csv) {
-            const lines = csv.split('\n');
-            questions = lines.map(line => {
-                const [question, correctIndex, ...options] = line.split(',').map(item => item.trim());
-                return {
-                    question,
-                    options,
-                    correct: parseInt(correctIndex) - 1 // Convert to 0-based index
-                };
-            }).filter(q => q.question); // Remove empty lines
+        function backToSelection() {
+            document.getElementById('quizSelection').classList.remove('hidden');
+            document.getElementById('quizContainer').classList.add('hidden');
+            document.getElementById('result').classList.add('hidden');
+            currentQuiz = null;
+        }
+
+        function selectQuiz(quizId) {
+            currentQuiz = quizzes[quizId];
+            document.getElementById('quizSelection').classList.add('hidden');
+            document.getElementById('quizContainer').classList.remove('hidden');
+            document.getElementById('result').classList.add('hidden');
+            displayQuiz();
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+            const total = currentQuiz.questions.length;
+            document.getElementById('progress').textContent = `${answered} of ${total} questions answered`;
         }
 
         function displayQuiz() {
             const quizDiv = document.getElementById('quiz');
-            quizDiv.innerHTML = questions.map((q, index) => `
-                <div class="question">
-                    <div><strong>Question ${index + 1}:</strong> ${q.question}</div>
-                    <div class="options">
+            quizDiv.innerHTML = currentQuiz.questions.map((q, index) => `
+                <div class="question bg-white p-8 rounded-xl shadow-md border border-gray-100">
+                    <div class="font-semibold text-lg text-gray-800 mb-6">Question ${index + 1}: ${q.question}</div>
+                    <div class="space-y-4">
                         ${q.options.map((option, optIndex) => `
-                            <div class="option">
-                                <input type="radio" name="q${index}" value="${optIndex}" id="q${index}o${optIndex}">
-                                <label for="q${index}o${optIndex}">${optIndex + 1}. ${option}</label>
-                            </div>
+                            <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                <input type="radio" name="q${index}" value="${optIndex}" id="q${index}o${optIndex}"
+                                    class="w-4 h-4 text-indigo-600" onchange="updateProgress()">
+                                <span class="text-gray-700">${option}</span>
+                            </label>
                         `).join('')}
                     </div>
                 </div>
@@ -98,30 +312,44 @@
             const resultDiv = document.getElementById('result');
             const questionDivs = document.querySelectorAll('.question');
 
-            questions.forEach((q, index) => {
+            currentQuiz.questions.forEach((q, index) => {
                 const selected = document.querySelector(`input[name="q${index}"]:checked`);
                 const questionDiv = questionDivs[index];
                 
-                questionDiv.classList.remove('correct', 'incorrect');
+                questionDiv.classList.remove('bg-green-50', 'bg-red-50');
                 
                 if (selected) {
                     if (parseInt(selected.value) === q.correct) {
                         score++;
-                        questionDiv.classList.add('correct');
+                        questionDiv.classList.add('bg-green-50');
+                        questionDiv.classList.add('border-green-200');
                     } else {
-                        questionDiv.classList.add('incorrect');
+                        questionDiv.classList.add('bg-red-50');
+                        questionDiv.classList.add('border-red-200');
                     }
                 } else {
-                    questionDiv.classList.add('incorrect');
+                    questionDiv.classList.add('bg-red-50');
+                    questionDiv.classList.add('border-red-200');
                 }
             });
 
-            const percentage = (score / questions.length) * 100;
+            const percentage = (score / currentQuiz.questions.length) * 100;
             resultDiv.innerHTML = `
-                <h2>Quiz Results</h2>
-                <p>You scored ${score} out of ${questions.length} (${percentage.toFixed(1)}%)</p>
+                <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">Quiz Results</h2>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-4xl font-bold text-indigo-600">${percentage.toFixed(1)}%</p>
+                            <p class="text-gray-600 mt-1">Score: ${score} out of ${currentQuiz.questions.length}</p>
+                        </div>
+                        <button onclick="backToSelection()" 
+                            class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-md">
+                            Try Another Quiz
+                        </button>
+                    </div>
+                </div>
             `;
-            resultDiv.style.display = 'block';
+            resultDiv.classList.remove('hidden');
         });
     </script>
 </body>
